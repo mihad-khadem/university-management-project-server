@@ -4,10 +4,7 @@ import mongoose from "mongoose";
 
 async function main() {
   try {
-    console.log(config.databaseURl);
-
     await mongoose.connect(config.databaseURl as string);
-
     app.listen(config.port, () => {
       console.log(`app listening on port ${config.port}`);
     });

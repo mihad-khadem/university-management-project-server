@@ -2,6 +2,8 @@ import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import config from "./app/config";
 import StudentRoutes from "./app/modules/student/student.route";
+import { error } from "console";
+import { userRoutes } from "./app/modules/user/user.route";
 
 // Application
 const app: Application = express();
@@ -12,11 +14,12 @@ app.use(cors());
 
 // application routes
 app.use("/api/v1/students", StudentRoutes);
+app.use("./api/v1/user", userRoutes);
 
 app.get("/", (req: Request, res: Response) => {
-  var a = 10;
-  // Send a JSON response with a property named "data" containing the value of 'a'
-  res.json("Hello World");
+  res.json("University Management System server running");
 });
+
+// error middleware
 
 export default app;
