@@ -3,14 +3,16 @@
 import { Request, Response } from "express";
 import zodUserValidation from "./user.validation";
 import { userServices } from "./user.service";
+import { TUser } from "./user.interface";
+import { TStudent } from "../student/student.interface";
 
 const createUser = async (req: Request, res: Response) => {
   try {
     // zod validation
-    const user = req.body.user;
-    const validationResult = zodUserValidation.safeParse(user);
-    const validatedUser = validationResult.data;
-    const result = await userServices.createUserInDB(validatedUser as string);
+    const { password, student: studentData } = req.body;
+    // const validationResult = zodUserValidation.safeParse(studentData);en
+    // const validatedUser = validationResult.data as TUser;
+    const result = await userServices.createUserInDB(password, studentData);
     res.status(201).json({
       success: true,
       message: "User created successfully",
@@ -67,7 +69,7 @@ const getUserById = async (req: Request, res: Response) => {
   }
 };
 
-export const StudentController = {
+export const userController = {
   createUser,
   getAllUsers,
   getUserById,
