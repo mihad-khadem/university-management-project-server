@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import zodUserValidation from "./user.validation";
+import sendResponse from "../../utils/sendResponse";
+import HttpStatus from "http-status";
 import { userServices } from "./user.service";
 import { TUser } from "./user.interface";
-import { TStudent } from "../student/student.interface";
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -11,32 +11,35 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
     // const validationResult = zodUserValidation.safeParse(studentData);en
     // const validatedUser = validationResult.data as TUser;
     const result = await userServices.createUserInDB(password, studentData);
-    res.status(201).json({
+    sendResponse(res, {
       success: true,
       message: "User created successfully",
       data: result,
+      statusCode: HttpStatus.CREATED,
     });
   } catch (error: any) {
     if (error.code === 11000) {
       // MongoDB duplicate key error code
-      return res.status(409).json({
+      sendResponse(res, {
         success: false,
         message: "Duplicate key error: ID must be unique",
+        statusCode: HttpStatus.CONFLICT,
       });
+    } else {
+      next(error);
     }
-    next(error);
   }
 };
 
 const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await userServices.getAllUsersFromDB();
-    res.status(200).json({
+    sendResponse<TUser[]>(res, {
       success: true,
-      message: "Students fetched successfully",
+      message: "Users fetched successfully",
       data: result,
     });
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 };
@@ -45,12 +48,12 @@ const getUserById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = req.params.id;
     const result = await userServices.getUserByIdFromDB(id);
-    res.status(200).json({
+    sendResponse(res, {
       success: true,
-      message: "Student fetched by id",
+      message: "User fetched by id",
       data: result,
     });
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 };
