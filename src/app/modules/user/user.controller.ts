@@ -1,12 +1,10 @@
-// user controller
-
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import zodUserValidation from "./user.validation";
 import { userServices } from "./user.service";
 import { TUser } from "./user.interface";
 import { TStudent } from "../student/student.interface";
 
-const createUser = async (req: Request, res: Response) => {
+const createUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // zod validation
     const { password, student: studentData } = req.body;
@@ -26,15 +24,11 @@ const createUser = async (req: Request, res: Response) => {
         message: "Duplicate key error: ID must be unique",
       });
     }
-    res.status(500).json({
-      success: false,
-      message: "An unexpected error occurred",
-      error: error.message || "An unexpected error occurred",
-    });
+    next(error);
   }
 };
 
-const getAllUsers = async (req: Request, res: Response) => {
+const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await userServices.getAllUsersFromDB();
     res.status(200).json({
@@ -42,16 +36,12 @@ const getAllUsers = async (req: Request, res: Response) => {
       message: "Students fetched successfully",
       data: result,
     });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "An unexpected error occurred",
-      error: error.message,
-    });
+  } catch (error) {
+    next(error);
   }
 };
 
-const getUserById = async (req: Request, res: Response) => {
+const getUserById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = req.params.id;
     const result = await userServices.getUserByIdFromDB(id);
@@ -60,12 +50,8 @@ const getUserById = async (req: Request, res: Response) => {
       message: "Student fetched by id",
       data: result,
     });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "An unexpected error occurred",
-      error: error.message,
-    });
+  } catch (error) {
+    next(error);
   }
 };
 
