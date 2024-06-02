@@ -10,4 +10,6 @@ const router = express.Router();
 router.get("/get-all-students", StudentController.getAllStudents);
 // get student by id
 router.get("/:id", StudentController.getStudentById);
+// delete student by id
+router.delete("/:id", StudentController.deleteStudentById);
 export default router;
