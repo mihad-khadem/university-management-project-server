@@ -5,8 +5,8 @@ const userNameSchema = z.object({
     .string()
     .min(1, "First name is required")
     .refine(
-      (value) => value.charAt(0) === value.charAt(0).toUpperCase(),
-      "First name must be capitalized"
+      (value) => /^[A-Z][a-z]*$/.test(value),
+      "First name must start with an uppercase letter"
     ),
   middleName: z.string().optional(),
   lastName: z
@@ -31,23 +31,34 @@ const localGuardianSchema = z.object({
   address: z.string().min(1, "Local guardian's address is required"),
 });
 
-export const zodStudentSchema = z.object({
-  id: z.string().min(1, "ID is required"),
-  name: userNameSchema,
-  gender: z.enum(["male", "female"], {
-    required_error: "Gender is required",
+const zodStudentValidation = z.object({
+  body: z.object({
+    password: z.string().min(5, "Minimum 5 character required"),
+    student: z.object({
+      name: userNameSchema,
+      gender: z.enum(["male", "female"], {
+        required_error: "Gender is required",
+      }),
+      dateOfBirth: z.string().optional(),
+      email: z
+        .string()
+        .email("Invalid email format")
+        .min(1, "Email is required"),
+      contactNo: z.string().min(1, "Contact number is required"),
+      emergencyContactNo: z
+        .string()
+        .min(1, "Emergency contact number is required"),
+      bloodGroup: z
+        .enum(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"])
+        .optional(),
+      presentAddress: z.string().min(1, "Present address is required"),
+      permanentAddress: z.string().min(1, "Permanent address is required"),
+      guardian: guardianSchema,
+      localGuardian: localGuardianSchema,
+      profileImg: z.string().optional(),
+      isActive: z.enum(["active", "blocked"]).default("active"),
+    }),
   }),
-  dateOfBirth: z.string().optional(),
-  email: z.string().email("Invalid email format").min(1, "Email is required"),
-  contactNo: z.string().min(1, "Contact number is required"),
-  emergencyContactNo: z.string().min(1, "Emergency contact number is required"),
-  bloodGroup: z
-    .enum(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"])
-    .optional(),
-  presentAddress: z.string().min(1, "Present address is required"),
-  permanentAddress: z.string().min(1, "Permanent address is required"),
-  guardian: guardianSchema,
-  localGuardian: localGuardianSchema,
-  profileImg: z.string().optional(),
-  isActive: z.enum(["active", "blocked"]).default("active"),
 });
+
+export default zodStudentValidation;

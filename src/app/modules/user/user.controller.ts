@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import express from "express";
 import sendResponse from "../../utils/sendResponse";
 import HttpStatus from "http-status";
 import { userServices } from "./user.service";
@@ -6,11 +6,8 @@ import { TUser } from "./user.interface";
 import catchAsync from "../../utils/catchAsync";
 
 // create user
-const createUser = catchAsync(async (req: Request, res: Response) => {
-  // zod validation
+const createUser = catchAsync(async (req, res) => {
   const { password, student: studentData } = req.body;
-  // const validationResult = zodUserValidation.safeParse(studentData);en
-  // const validatedUser = validationResult.data as TUser;
   const result = await userServices.createUserInDB(password, studentData);
   sendResponse(res, {
     success: true,
@@ -20,7 +17,7 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 // get all users
-const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+const getAllUsers = catchAsync(async (req, res) => {
   const result = await userServices.getAllUsersFromDB();
   sendResponse<TUser[]>(res, {
     success: true,
@@ -29,7 +26,7 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   });
 });
 // get user by id
-const getUserById = catchAsync(async (req: Request, res: Response) => {
+const getUserById = catchAsync(async (req, res) => {
   const id = req.params.id;
   const result = await userServices.getUserByIdFromDB(id);
   sendResponse(res, {
@@ -39,7 +36,7 @@ const getUserById = catchAsync(async (req: Request, res: Response) => {
   });
 });
 // delete user by id
-const deleteUserById = catchAsync(async (req: Request, res: Response) => {
+const deleteUserById = catchAsync(async (req, res) => {
   const id = req.params.id;
   const result = await userServices.deleteUserFromDB(id);
   sendResponse(res, {

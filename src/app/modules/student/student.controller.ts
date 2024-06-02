@@ -1,11 +1,11 @@
-import { NextFunction, Request, Response } from "express";
+import express from "express";
 import { StudentServices } from "./student-service";
 import { TStudent } from "./student.interface";
 import sendResponse from "../../utils/sendResponse";
 import catchAsync from "../../utils/catchAsync"; // Import the catchAsync utility
 
 // Handler to get all students
-const getAllStudents = catchAsync(async (req: Request, res: Response) => {
+const getAllStudents = catchAsync(async (req, res) => {
   const result = await StudentServices.getAllStudentsFromDB();
   sendResponse<TStudent[]>(res, {
     success: true,
@@ -15,7 +15,7 @@ const getAllStudents = catchAsync(async (req: Request, res: Response) => {
 });
 
 // Handler to get a student by ID
-const getStudentById = catchAsync(async (req: Request, res: Response) => {
+const getStudentById = catchAsync(async (req, res) => {
   const id = req.params.id;
   const result = await StudentServices.getStudentById(id);
   sendResponse<TStudent[]>(res, {
@@ -26,7 +26,7 @@ const getStudentById = catchAsync(async (req: Request, res: Response) => {
 });
 
 // Handler to delete a student by ID
-const deleteStudentById = catchAsync(async (req: Request, res: Response) => {
+const deleteStudentById = catchAsync(async (req, res) => {
   const id = req.params.id;
   const result = await StudentServices.deleteStudentFromDB(id);
   sendResponse<TStudent>(res, {

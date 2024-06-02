@@ -14,16 +14,21 @@ const userNameSchema = new Schema<TUserName>({
     trim: true,
     validate: {
       validator: function (value: string) {
-        const firstNameStr = value.charAt(0).toUpperCase() + value.slice(1);
-        return firstNameStr === value;
+        return /^[A-Z][a-z]*$/.test(value);
       },
-      message: "{VALUE} is not in capitalize",
+      message: "First name must start with an uppercase letter",
     },
   },
   middleName: { type: String, trim: true },
   lastName: {
     type: String,
     required: true,
+    validate: {
+      validator: function (value: string) {
+        return /^[a-zA-Z]+$/.test(value);
+      },
+      message: "Last name must be alphabetic",
+    },
   },
 });
 
@@ -54,11 +59,7 @@ const studentSchema = new Schema<TStudent, StudentModel>({
   name: { type: userNameSchema, required: true },
   gender: { type: String, enum: ["male", "female"], required: true },
   dateOfBirth: { type: String },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
+  email: { type: String, required: true, unique: true },
   contactNo: { type: String, required: true },
   emergencyContactNo: { type: String, required: true },
   bloodGroup: {
@@ -72,17 +73,9 @@ const studentSchema = new Schema<TStudent, StudentModel>({
   profileImg: { type: String },
 });
 
-// creating a custom static method
 studentSchema.statics.isUserExists = async function (id: string) {
   const existingStudent = await Student.findOne({ id });
   return existingStudent;
 };
 
-// creating a custom instance method
-// studentSchema.methods.isUserExists = async function (id: string) {
-//   const existingStudent = await Student.findById(id);
-//   console.log("model", existingStudent);
-
-//   return existingStudent;
-// };
 export const Student = model<TStudent, StudentModel>("Student", studentSchema);
