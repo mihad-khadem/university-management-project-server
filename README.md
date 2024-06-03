@@ -1,5 +1,19 @@
 # University Management Server
 
+## Technology Stack
+
+- Node.js
+- Express
+- TypeScript
+- MongoDB
+- Mongoose
+- Zod
+- bcrypt
+- JWT
+
+## Requirement Analysis
+
+<div></hr></div>
 ## [ER-Diagram](https://app.eraser.io/workspace/l9nnVYLCN11RJnDMqaYT?origin=share)
 
 ## API Endpoints
