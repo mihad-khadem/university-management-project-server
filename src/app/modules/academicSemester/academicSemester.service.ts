@@ -1,5 +1,6 @@
 // academic semester services
 
+import { academicSemesterNameCodeMapper } from "./academicSemester.constant";
 import {
   TAcademicSemester,
   TAcademicSemesterNameCodeMapper,
@@ -36,6 +37,13 @@ const updateAcademicSemesterInDB = async (
   id: string,
   payload: Partial<TAcademicSemester>
 ) => {
+  if (
+    payload.name &&
+    payload.code &&
+    academicSemesterNameCodeMapper[payload.name] !== payload.code
+  ) {
+    throw new Error("Invalid semester code");
+  }
   const result = await AcademicSemesterModel.findByIdAndUpdate(id, payload, {
     new: true,
   });

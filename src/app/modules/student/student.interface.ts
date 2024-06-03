@@ -30,6 +30,7 @@ export type TStudent = {
   dateOfBirth?: Date;
   email: string;
   contactNo: string;
+  admissionSemester: Types.ObjectId;
   emergencyContactNo: string;
   bloodGroup?: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
   presentAddress: string;

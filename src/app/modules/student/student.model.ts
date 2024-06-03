@@ -61,6 +61,11 @@ const studentSchema = new Schema<TStudent, StudentModel>({
   dateOfBirth: { type: Date },
   email: { type: String, required: true, unique: true },
   contactNo: { type: String, required: true },
+  admissionSemester: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: "AcademicSemester",
+  },
   emergencyContactNo: { type: String, required: true },
   bloodGroup: {
     type: String,
