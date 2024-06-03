@@ -31,7 +31,7 @@ const localGuardianSchema = z.object({
   address: z.string().min(1, "Local guardian's address is required"),
 });
 
-const zodStudentValidation = z.object({
+const createZodStudentValidation = z.object({
   body: z.object({
     password: z.string().min(5, "Minimum 5 character required"),
     student: z.object({
@@ -39,7 +39,7 @@ const zodStudentValidation = z.object({
       gender: z.enum(["male", "female"], {
         required_error: "Gender is required",
       }),
-      dateOfBirth: z.string().optional(),
+      dateOfBirth: z.date().optional(),
       email: z
         .string()
         .email("Invalid email format")
@@ -61,4 +61,4 @@ const zodStudentValidation = z.object({
   }),
 });
 
-export default zodStudentValidation;
+export default createZodStudentValidation;

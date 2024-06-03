@@ -1,14 +1,14 @@
 import express from "express";
 import { userController } from "./user.controller";
 import validateRequest from "../../middleware/validateRequest";
-import zodStudentValidation from "../student/zod.validation";
+import createZodStudentValidation from "../student/zod.validation";
 
 const router = express.Router();
 
 // create user api
 router.post(
   "/create-student",
-  validateRequest(zodStudentValidation),
+  validateRequest(createZodStudentValidation),
   userController.createUser
 );
 
