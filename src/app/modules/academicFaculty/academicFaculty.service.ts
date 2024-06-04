@@ -10,7 +10,7 @@ const createAcademicFaculty = async (payload: TAcademicFaculty) => {
 };
 
 // get all academic faculty
-const getAllAcademicFaculties = async (): Promise<TAcademicFaculty[]> => {
+const getAllAcademicFaculties = async () => {
   const result = await AcademicFacultyModel.find();
   return result;
 };

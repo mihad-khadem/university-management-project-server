@@ -9,8 +9,9 @@ import { TAcademicFaculty } from "./academicFaculty.interface";
 // create new academic faculty
 const createAcademicFaculty = catchAsync(async (req, res) => {
   const academicFacultyData: TAcademicFaculty = req.body;
-  const result =
-    academicFacultyServices.createAcademicFaculty(academicFacultyData);
+  const result = await academicFacultyServices.createAcademicFaculty(
+    academicFacultyData
+  );
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
     success: true,
@@ -20,7 +21,7 @@ const createAcademicFaculty = catchAsync(async (req, res) => {
 });
 // get all academic faculty
 const getAllAcademicFaculties = catchAsync(async (req, res) => {
-  const result = academicFacultyServices.getAllAcademicFaculties();
+  const result = await academicFacultyServices.getAllAcademicFaculties();
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -31,7 +32,7 @@ const getAllAcademicFaculties = catchAsync(async (req, res) => {
 // get by id
 const getSingleAcademicFacultyById = catchAsync(async (req, res) => {
   const id = req.params.id;
-  const result = academicFacultyServices.getSingleAcademicFaculty(id);
+  const result = await academicFacultyServices.getSingleAcademicFaculty(id);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -43,7 +44,10 @@ const getSingleAcademicFacultyById = catchAsync(async (req, res) => {
 const updateAcademicFacultyById = catchAsync(async (req, res) => {
   const id = req.params.id;
   const payload = req.body;
-  const result = academicFacultyServices.updateAcademicFaculty(id, payload);
+  const result = await academicFacultyServices.updateAcademicFaculty(
+    id,
+    payload
+  );
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -54,7 +58,7 @@ const updateAcademicFacultyById = catchAsync(async (req, res) => {
 // delete by id
 const deleteAcademicFacultyById = catchAsync(async (req, res) => {
   const id = req.params.id;
-  const result = academicFacultyServices.deleteAcademicFaculty(id);
+  const result = await academicFacultyServices.deleteAcademicFaculty(id);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
