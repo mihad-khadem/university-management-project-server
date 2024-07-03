@@ -10,13 +10,17 @@ const createAcademicDepartmentInDB = async (payload: TAcademicDepartment) => {
 };
 // get all academic departments
 const getAllAcademicDepartmentsFromDB = async () => {
-  const result = await academicDepartmentModel.find();
+  const result = await academicDepartmentModel
+    .find()
+    .populate("academicFaculty");
   return result;
 };
 // get single academic department
 
 const getSingleAcademicDepartmentFromDB = async (id: string) => {
-  const result = await academicDepartmentModel.findById(id);
+  const result = await academicDepartmentModel
+    .findById(id)
+    .populate("academicFaculty");
   return result;
 };
 // update single academic department
@@ -24,9 +28,13 @@ const updateAcademicDepartmentInDB = async (
   id: string,
   payload: Partial<TAcademicDepartment>
 ) => {
-  const result = await academicDepartmentModel.findByIdAndUpdate(id, payload, {
-    new: true,
-  });
+  const result = await academicDepartmentModel.findByIdAndUpdate(
+    { _id: id },
+    payload,
+    {
+      new: true,
+    }
+  );
   return result;
 };
 // delete single academic department
