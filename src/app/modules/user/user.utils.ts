@@ -1,3 +1,5 @@
+import httpStatus from "http-status";
+import AppError from "../../errors/AppError";
 import { TAcademicSemester } from "../academicSemester/academicSemester.interface";
 import UserModel from "./user.model";
 
@@ -36,7 +38,7 @@ export const generateStudentId = async (payload: TAcademicSemester) => {
   // Ensure the generated ID is unique
   const existingStudent = await UserModel.findOne({ id: newId });
   if (existingStudent) {
-    throw new Error("Duplicate student ID generated");
+    throw new AppError(httpStatus.CONFLICT, "Duplicate student ID generated");
     // Handle this case accordingly in your application
   }
 
