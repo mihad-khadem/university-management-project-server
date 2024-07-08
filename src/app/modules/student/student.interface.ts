@@ -26,11 +26,10 @@ export type TStudent = {
   id: string;
   user: Types.ObjectId;
   name: TUserName;
-  gender: "male" | "female";
+  gender: "male" | "female" | "other";
   dateOfBirth?: Date;
   email: string;
   contactNo: string;
-  admissionSemester: Types.ObjectId;
   emergencyContactNo: string;
   bloodGroup?: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
   presentAddress: string;
@@ -38,19 +37,12 @@ export type TStudent = {
   guardian: TGuardian;
   localGuardian: TLocalGuardian;
   profileImg?: string;
+  admissionSemester: Types.ObjectId;
+  academicDepartment: Types.ObjectId;
   isDeleted: boolean;
+  academicSemester: Types.ObjectId; // Add this line
 };
-// for creating custom instance methods
-// export type TStudentMethods = {
-//   isUserExists(id: string): Promise<TStudent | null>;
-// };
-// export type TStudentModel = Model<
-//   TStudent,
-//   Record<string, never>,
-//   TStudentMethods
-// >;
 
-// for creating static methods
 export interface StudentModel extends Model<TStudent> {
   isUserExists(id: string): Promise<TStudent | null>;
 }

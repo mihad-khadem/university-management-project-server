@@ -16,7 +16,6 @@ const getAllAcademicDepartmentsFromDB = async () => {
   return result;
 };
 // get single academic department
-
 const getSingleAcademicDepartmentFromDB = async (id: string) => {
   const result = await academicDepartmentModel
     .findById(id)

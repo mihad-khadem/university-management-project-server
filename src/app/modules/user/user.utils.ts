@@ -1,44 +1,44 @@
 import { TAcademicSemester } from "../academicSemester/academicSemester.interface";
 import UserModel from "./user.model";
 
-// find last admitted student id
 const findLastStudentId = async () => {
   const lastStudent = await UserModel.findOne(
-    {
-      role: "student",
-    },
-    {
-      id: 1,
-      _id: 0,
-    }
+    { role: "student" },
+    { id: 1, _id: 0 }
   )
-    .sort({
-      createdAt: -1,
-    })
+    .sort({ createdAt: -1 })
     .lean();
-  //203001   0001
-  return lastStudent?.id ? lastStudent.id.substring(6) : undefined;
+  return lastStudent?.id || undefined;
 };
+
 export const generateStudentId = async (payload: TAcademicSemester) => {
-  // first time 0000
-  //0001  => 1
-  let currentId = (0).toString(); // 0000 by default
+  let incrementId = "0001"; // Default starting ID
+
+  // Fetch the last used student ID
   const lastStudentId = await findLastStudentId();
-  const lastStudentSemesterCode = lastStudentId?.substring(4, 6); // 01
-  const lastStudentSemesterYear = lastStudentId?.substring(0, 4); // 2023
-  const currentSemesterCode = payload?.code;
-  const currentSemesterYear = payload?.year;
-  if (
-    lastStudentId &&
-    lastStudentSemesterCode === currentSemesterCode &&
-    lastStudentSemesterYear === currentSemesterYear
-  ) {
-    currentId = lastStudentId.substring(6);
+
+  // Check if the last student ID matches the current semester
+  if (lastStudentId) {
+    const lastSemesterYear = lastStudentId.substring(0, 4);
+    const lastSemesterCode = lastStudentId.substring(4, 6);
+
+    if (
+      lastSemesterYear === payload.year &&
+      lastSemesterCode === payload.code
+    ) {
+      const lastIncrement = parseInt(lastStudentId.substring(6), 10);
+      incrementId = (lastIncrement + 1).toString().padStart(4, "0");
+    }
   }
 
-  let incrementId = (Number(currentId) + 1).toString().padStart(4, "0");
+  const newId = `${payload.year}${payload.code}${incrementId}`;
 
-  incrementId = `${payload.year}${payload.code}${incrementId}`;
+  // Ensure the generated ID is unique
+  const existingStudent = await UserModel.findOne({ id: newId });
+  if (existingStudent) {
+    throw new Error("Duplicate student ID generated");
+    // Handle this case accordingly in your application
+  }
 
-  return incrementId;
+  return newId;
 };

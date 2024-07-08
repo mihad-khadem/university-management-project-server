@@ -1,6 +1,7 @@
 // academic department model
 import mongoose, { Schema } from "mongoose";
 import { TAcademicDepartment } from "./academicDepartment.interface";
+import AppError from "../../errors/AppError";
 
 const academicDepartmentSchema = new Schema<TAcademicDepartment>(
   {
@@ -34,7 +35,7 @@ academicDepartmentSchema.pre("findOneAndUpdate", async function (next) {
   console.log(query);
   const isDepartmentExists = await academicDepartmentModel.findOne(query);
   if (!isDepartmentExists) {
-    throw new Error("This department does not exist");
+    throw new AppError(404, "This department is already exists !!");
   }
   next();
 });

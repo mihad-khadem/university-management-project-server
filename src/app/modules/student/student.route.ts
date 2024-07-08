@@ -8,7 +8,7 @@ const router = express.Router();
 // router.post("/create-student", StudentController.createStudent);
 
 // get all students
-router.get("/get-all-students", StudentController.getAllStudents);
+router.get("/", StudentController.getAllStudents);
 // get student by id
 router.get("/:id", StudentController.getStudentById);
 // delete student by id
