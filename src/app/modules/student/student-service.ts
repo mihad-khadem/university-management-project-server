@@ -6,8 +6,28 @@ import AppError from "../../errors/AppError";
 import UserModel from "../user/user.model";
 
 // Fetch all students from the database
-const getAllStudentsFromDB = async () => {
-  const result = await Student.find()
+const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
+  // searching format : {email: {$regex : query.searchTerm , $options: "i"}},
+
+  let searchTerm = "";
+  if (query && query.searchTerm) {
+    searchTerm = query?.searchTerm as string;
+  }
+
+  const result = await Student.find({
+    $or: [
+      "fullName",
+      "firstName",
+      "lastName",
+      "email",
+      "contactNumber",
+      "id",
+      "presentAddress",
+      "permanentAddress",
+    ].map((key) => ({
+      [key]: { $regex: searchTerm, $options: "i" },
+    })),
+  })
     .populate("admissionSemester")
     .populate({
       path: "academicDepartment",
@@ -72,7 +92,7 @@ const deleteStudentFromDB = async (id: string) => {
   } catch (error) {
     await session.abortTransaction();
     await session.endSession();
-    throw error;
+    throw new Error("Failed to delete student");
   }
 };
 

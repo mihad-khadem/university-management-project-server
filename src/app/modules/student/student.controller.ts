@@ -1,12 +1,13 @@
-import express from "express";
+import express, { RequestHandler } from "express";
 import { StudentServices } from "./student-service";
 import { TStudent } from "./student.interface";
 import sendResponse from "../../utils/sendResponse";
 import catchAsync from "../../utils/catchAsync"; // Import the catchAsync utility
 
 // Handler to get all students
-const getAllStudents = catchAsync(async (req, res) => {
-  const result = await StudentServices.getAllStudentsFromDB();
+const getAllStudents: RequestHandler = catchAsync(async (req, res) => {
+  const query = req.query;
+  const result = await StudentServices.getAllStudentsFromDB(query);
   sendResponse<TStudent[]>(res, {
     success: true,
     message: "Students fetched successfully",
