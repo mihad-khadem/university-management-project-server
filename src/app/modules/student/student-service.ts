@@ -8,26 +8,35 @@ import UserModel from "../user/user.model";
 // Fetch all students from the database
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
   // searching format : {email: {$regex : query.searchTerm , $options: "i"}},
-
+  // query copy object
+  const queryObject = { ...query };
+  const studentSearchFields: string[] = [
+    "fullName",
+    "firstName",
+    "lastName",
+    "email",
+    "contactNumber",
+    "id",
+    "presentAddress",
+    "permanentAddress",
+  ];
   let searchTerm = "";
   if (query && query.searchTerm) {
     searchTerm = query?.searchTerm as string;
   }
-
-  const result = await Student.find({
-    $or: [
-      "fullName",
-      "firstName",
-      "lastName",
-      "email",
-      "contactNumber",
-      "id",
-      "presentAddress",
-      "permanentAddress",
-    ].map((key) => ({
+  // search query
+  const searchQuery = Student.find({
+    $or: studentSearchFields.map((key) => ({
       [key]: { $regex: searchTerm, $options: "i" },
     })),
-  })
+  });
+  // filtering query
+  const excludeFields = ["searchTerm"];
+  excludeFields.forEach((element) => delete queryObject[element]);
+
+  // base find method
+  const result = await searchQuery
+    .find(queryObject)
     .populate("admissionSemester")
     .populate({
       path: "academicDepartment",
