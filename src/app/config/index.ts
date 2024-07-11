@@ -9,4 +9,5 @@ export default {
   databaseURL: process.env.MONGODB_URL,
   defaultPassword: process.env.DEFAULT_PASSWORD,
   bcryptSaltRounds: process.env.SALT,
+  node_env: process.env.NODE_ENV,
 };

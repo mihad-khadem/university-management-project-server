@@ -20,6 +20,8 @@ const getSingleAcademicDepartmentFromDB = async (id: string) => {
   const result = await academicDepartmentModel
     .findById(id)
     .populate("academicFaculty");
+  console.log(id);
+
   return result;
 };
 // update single academic department

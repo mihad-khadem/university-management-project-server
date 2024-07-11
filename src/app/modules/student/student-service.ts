@@ -1,6 +1,11 @@
+import mongoose from "mongoose";
+import httpStatus from "http-status";
 import { Student } from "./student.model";
-import { StudentModel, TStudent } from "./student.interface";
+import { TStudent } from "./student.interface";
+import AppError from "../../errors/AppError";
+import UserModel from "../user/user.model";
 
+// Fetch all students from the database
 const getAllStudentsFromDB = async () => {
   const result = await Student.find()
     .populate("admissionSemester")
@@ -12,9 +17,12 @@ const getAllStudentsFromDB = async () => {
     });
   return result;
 };
-// get student by id
+
+// Fetch a student by ID from the database
 const getStudentById = async (id: string) => {
-  const result = await Student.find({ id })
+  console.log("from service : ", id);
+
+  const result = await Student.findOne({ id })
     .populate("admissionSemester")
     .populate({
       path: "academicDepartment",
@@ -22,13 +30,53 @@ const getStudentById = async (id: string) => {
         path: "academicFaculty",
       },
     });
+  console.log(result);
+
   return result;
 };
-// delete student by id
+
+// Soft delete a student by ID (makes isDeleted = true)
 const deleteStudentFromDB = async (id: string) => {
-  const result = await Student.deleteOne({ id });
-  return result;
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    // Update the student document to mark it as deleted
+    const deletedStudent = await Student.findOneAndUpdate(
+      { id },
+      { $set: { isDeleted: true } },
+      { new: true, session }
+    );
+
+    // If student not found, throw an error
+    if (!deletedStudent) {
+      throw new AppError(httpStatus.BAD_REQUEST, "Failed to delete student");
+    }
+
+    // Update the user document to mark it as deleted
+    const deletedUser = await UserModel.findOneAndUpdate(
+      { id },
+      { $set: { isDeleted: true } },
+      { new: true, session }
+    );
+
+    // If user not found, throw an error
+    if (!deletedUser) {
+      throw new AppError(httpStatus.BAD_REQUEST, "Failed to delete user");
+    }
+
+    await session.commitTransaction();
+    await session.endSession();
+    return deletedStudent;
+  } catch (error) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw error;
+  }
 };
+
+// Exporting the student services
 export const StudentServices = {
   getAllStudentsFromDB,
   getStudentById,

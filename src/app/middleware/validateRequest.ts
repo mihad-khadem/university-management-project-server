@@ -1,29 +1,18 @@
-// src/middleware/validateRequest.ts
-import { Request, Response, NextFunction } from "express";
-import { ZodSchema, AnyZodObject, ZodError } from "zod";
-import HttpStatus from "http-status";
-import sendResponse from "../utils/sendResponse";
+import { NextFunction, Request, Response } from "express";
+import { AnyZodObject } from "zod";
 
-const validateRequest = (schema: AnyZodObject | ZodSchema) => {
+const validateRequest = (schema: AnyZodObject) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
+      // validation check
+      //if everything all right next() ->
       await schema.parseAsync({
         body: req.body,
-        query: req.query,
-        params: req.params,
       });
+
       next();
-    } catch (error) {
-      if (error instanceof ZodError) {
-        sendResponse(res, {
-          statusCode: HttpStatus.BAD_REQUEST,
-          success: false,
-          message: "Validation Error",
-          data: error.errors,
-        });
-      } else {
-        next(error);
-      }
+    } catch (err) {
+      next(err);
     }
   };
 };

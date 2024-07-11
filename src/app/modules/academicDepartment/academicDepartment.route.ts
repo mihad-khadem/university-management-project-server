@@ -11,9 +11,9 @@ const router = express.Router();
 // create  academic department route
 router.post(
   "/create-department",
-  validateRequest(
-    AcademicDepartmentValidations.createAcademicDepartmentValidationSchema
-  ),
+  // validateRequest(
+  //   AcademicDepartmentValidations.createAcademicDepartmentValidationSchema
+  // ),
   academicDepartmentControllers.createAcademicDepartment
 );
 // get all academic departments

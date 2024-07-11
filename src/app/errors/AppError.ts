@@ -12,3 +12,13 @@ class AppError extends Error {
 }
 
 export default AppError;
+
+// pattern
+/* 
+ success 
+ message
+ error source : [
+ path : "",
+ message : "" ]
+ stack : ""
+ */

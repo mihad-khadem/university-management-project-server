@@ -7,6 +7,7 @@ import {
   TUserName,
 } from "./student.interface";
 
+// Define sub-schema for user name
 const userNameSchema = new Schema<TUserName>({
   firstName: {
     type: String,
@@ -26,6 +27,7 @@ const userNameSchema = new Schema<TUserName>({
   },
 });
 
+// Define sub-schema for guardian information
 const guardianSchema = new Schema<TGuardian>({
   fatherName: {
     type: String,
@@ -55,6 +57,7 @@ const guardianSchema = new Schema<TGuardian>({
   },
 });
 
+// Define sub-schema for local guardian information
 const localGuardianSchema = new Schema<TLocalGuardian>({
   name: {
     type: String,
@@ -74,6 +77,7 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
   },
 });
 
+// Define main schema for student
 const studentSchema = new Schema<TStudent, StudentModel>(
   {
     id: {
@@ -135,7 +139,6 @@ const studentSchema = new Schema<TStudent, StudentModel>(
     },
     profileImg: { type: String },
     admissionSemester: {
-      // Add this block
       type: Schema.Types.ObjectId,
       ref: "AcademicSemester",
     },
@@ -155,21 +158,22 @@ const studentSchema = new Schema<TStudent, StudentModel>(
   }
 );
 
-// Virtual
+// Virtual property to get full name
 studentSchema.virtual("fullName").get(function () {
   return `${
     this.name.firstName
   } ${this.name.middleName || ""} ${this.name.lastName}`;
 });
 
-// Query Middleware
+// Query Middleware to filter out deleted students
 studentSchema.pre("find", function (next) {
   this.find({ isDeleted: { $ne: true } });
   next();
 });
-
+// isDeleted middleware
 studentSchema.pre("findOne", function (next) {
-  this.find({ isDeleted: { $ne: true } });
+  console.log("Applying isDeleted filter in findOne middleware");
+  this.where({ isDeleted: { $ne: true } });
   next();
 });
 
@@ -178,10 +182,11 @@ studentSchema.pre("aggregate", function (next) {
   next();
 });
 
-// Creating a custom static method
+// Static method to check if a user exists by ID
 studentSchema.statics.isUserExists = async function (id: string) {
   const existingUser = await this.findOne({ id });
   return existingUser;
 };
 
+// Exporting the Student model
 export const Student = model<TStudent, StudentModel>("Student", studentSchema);

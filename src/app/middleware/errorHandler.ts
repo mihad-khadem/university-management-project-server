@@ -1,25 +1,67 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
+import { ZodError } from "zod";
+import { TErrorSource } from "../interfaces/error";
+import config from "../config";
+import handleZodError from "../errors/handleZodError";
+import handleValidationError from "../errors/handleValidationError";
+import handleCastError from "../errors/handleCastError";
+import handleDuplicateError from "../errors/handleDuplicateError";
 
-interface CustomError extends Error {
-  statusCode?: number;
-  details?: string;
-}
+// Type for error handler functions
+type ErrorHandlerFunction = (err: any) => {
+  statusCode: number;
+  message: string;
+  errorSources: TErrorSource;
+};
 
-const errorHandler = (
-  err: CustomError,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const status = err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
+// Mapping error names to handlers
+const errorHandlers: { [key: string]: ErrorHandlerFunction } = {
+  ZodError: handleZodError,
+  ValidationError: handleValidationError,
+  CastError: handleCastError,
+  DuplicateError: handleDuplicateError,
+};
+
+const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+  let status = err.statusCode || 500;
+  let message = err.message || "Internal Server Error";
+  let errorSource: TErrorSource = [
+    {
+      path: "",
+      message: "something went wrong",
+    },
+  ];
 
   console.error(`Error: ${message}`);
 
-  res.status(status).json({
+  if (err instanceof ZodError) {
+    const simplifiedError = errorHandlers["ZodError"](err);
+    status = simplifiedError.statusCode;
+    message = simplifiedError.message;
+    errorSource = simplifiedError.errorSources;
+  } else if (err?.name === "ValidationError") {
+    const simplifiedError = errorHandlers["ValidationError"](err);
+    status = simplifiedError.statusCode;
+    message = simplifiedError.message;
+    errorSource = simplifiedError.errorSources;
+  } else if (err.name === "CastError") {
+    const simplifiedError = errorHandlers["CastError"](err);
+    status = simplifiedError.statusCode;
+    message = simplifiedError.message;
+    errorSource = simplifiedError.errorSources;
+  } else if (err.code === 11000) {
+    const simplifiedError = errorHandlers["DuplicateError"](err);
+    status = simplifiedError.statusCode;
+    message = simplifiedError.message;
+    errorSource = simplifiedError.errorSources;
+  }
+
+  return res.status(status).json({
+    statusCode: status,
     success: false,
     message,
-    ...(err.details && { details: err.details }),
+    errorSource,
+    stack: config.node_env === "development" ? err?.stack : null,
   });
 };
 

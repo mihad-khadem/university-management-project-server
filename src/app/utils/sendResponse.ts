@@ -9,18 +9,11 @@ type ApiResponse<T> = {
 };
 
 const sendResponse = <T>(res: Response, data: ApiResponse<T>) => {
-  const {
-    success,
-    message,
-    statusCode = HttpStatus.OK,
-    data: responseData,
-  } = data;
-
-  res.status(statusCode).json({
-    statusCode,
-    success,
-    message,
-    data: responseData,
+  res.status(data?.statusCode ?? HttpStatus.OK).json({
+    statusCode: data?.statusCode,
+    success: data.success,
+    message: data.message,
+    data: data.data,
   });
 };
 

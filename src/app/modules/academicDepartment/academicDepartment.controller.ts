@@ -30,7 +30,7 @@ const getAllAcademicDepartments = catchAsync(async (req, res) => {
 
 // get by id
 const getSingleAcademicDepartmentById = catchAsync(async (req, res) => {
-  const id = req.params.id;
+  const { id } = req.params;
   const result =
     await academicDepartmentServices.getSingleAcademicDepartmentFromDB(id);
   sendResponse(res, {

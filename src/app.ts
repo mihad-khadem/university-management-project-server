@@ -15,7 +15,7 @@ app.use(cors());
 app.use("/api/v1", routes);
 
 // default route
-app.get("/", (req: Request, res: Response) => {
+app.get("/test", (req: Request, res: Response) => {
   res.json("University Management System server running");
 });
 
