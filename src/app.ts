@@ -16,7 +16,8 @@ app.use("/api/v1", routes);
 
 // default route
 app.get("/test", (req: Request, res: Response) => {
-  res.json("University Management System server running");
+  // res.json("University Management System server running");
+  Promise.reject();
 });
 
 // global error handler middleware

@@ -6,6 +6,7 @@ import handleZodError from "../errors/handleZodError";
 import handleValidationError from "../errors/handleValidationError";
 import handleCastError from "../errors/handleCastError";
 import handleDuplicateError from "../errors/handleDuplicateError";
+import AppError from "../errors/AppError";
 
 // Type for error handler functions
 type ErrorHandlerFunction = (err: any) => {
@@ -54,6 +55,23 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     status = simplifiedError.statusCode;
     message = simplifiedError.message;
     errorSource = simplifiedError.errorSources;
+  } else if (err instanceof AppError) {
+    status = err.statusCode;
+    message = err.message;
+    errorSource = [
+      {
+        path: "",
+        message: err?.message,
+      },
+    ];
+  } else if (err instanceof Error) {
+    message = err.message;
+    errorSource = [
+      {
+        path: "",
+        message: err?.message,
+      },
+    ];
   }
 
   return res.status(status).json({
