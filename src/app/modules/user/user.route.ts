@@ -2,6 +2,7 @@ import express from "express";
 import { userController } from "./user.controller";
 import validateRequest from "../../middleware/validateRequest";
 import createZodStudentValidation from "../student/zod.validation";
+import { createFacultyValidationSchema } from "../faculty/faculty.validation";
 
 const router = express.Router();
 
@@ -10,6 +11,13 @@ router.post(
   "/create-student",
   validateRequest(createZodStudentValidation),
   userController.createUser
+);
+// create faculty
+
+router.post(
+  "/create-faculty",
+  validateRequest(createFacultyValidationSchema),
+  userController.createFaculty
 );
 
 // get all users

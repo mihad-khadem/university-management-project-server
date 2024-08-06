@@ -1,7 +1,7 @@
 import config from "../../config";
 import { TAcademicSemester } from "../academicSemester/academicSemester.interface";
 import { AcademicSemesterModel } from "../academicSemester/academicSemester.model";
-import { generateStudentId } from "./user.utils";
+import { generateFacultyId, generateStudentId } from "./user.utils";
 import { TStudent } from "../student/student.interface";
 import { Student } from "../student/student.model";
 import { TUser } from "./user.interface";
@@ -9,6 +9,10 @@ import UserModel from "./user.model";
 import AppError from "../../errors/AppError";
 import httpStatus from "http-status";
 import mongoose from "mongoose";
+import { TFaculty } from "../faculty/faculty.interface";
+import { academicDepartmentModel } from "../academicDepartment/academicDepartment.model";
+import { FacultyModel } from "../faculty/faculty.model";
+import { abort } from "process";
 /**
  * Creates a new user and corresponding student record in the database.
  * @param password Password for the user, defaulting to a configured default if not provided.
@@ -16,6 +20,8 @@ import mongoose from "mongoose";
  * @returns Newly created student record.
  * @throws {AppError} If any validation or database operation fails.
  */
+
+//! creating user service
 const createUserInDB = async (password: string, payload: TStudent) => {
   const userData: Partial<TUser> = {};
   userData.password = password || (config.defaultPassword as string);
@@ -89,9 +95,59 @@ const deleteUserFromDB = async (id: string) => {
   return await UserModel.findByIdAndDelete(id);
 };
 
+//! creating faculty service
+const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
+  // create a user object
+  const userData: Partial<TUser> = {};
+  // if pass is not given
+  userData.password = password || (config.defaultPassword as string);
+  // set  role
+  userData.role = "faculty";
+  // find academic department info
+  console.log(payload.academicDepartment);
+
+  const academicDepartment = await academicDepartmentModel.findById(
+    payload.academicDepartment
+  );
+  if (!academicDepartment) {
+    throw new AppError(httpStatus.NOT_FOUND, "Academic department not found");
+  }
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    // setting generated id
+    userData.id = await generateFacultyId();
+    // creating user
+    const newUser = await UserModel.create([userData], { session });
+    // create faculty
+    if (!newUser.length) {
+      throw new AppError(httpStatus.BAD_REQUEST, "Failed to create user");
+    }
+    // set id, _id as user
+    payload.id = newUser[0].id;
+    payload.user = newUser[0]._id; // reference id
+    // creating faculty
+    const newFaculty = await FacultyModel.create([payload], { session });
+    if (!newFaculty.length) {
+      throw new AppError(httpStatus.BAD_REQUEST, "Failed to create faculty");
+    }
+    await session.commitTransaction();
+    return newFaculty;
+  } catch (error: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(error);
+  } finally {
+    await session.endSession();
+
+    console.log("session ended");
+  }
+};
+
 // Exported object containing all user-related service functions
 export const userServices = {
   createUserInDB,
+  createFacultyIntoDB,
   getAllUsersFromDB,
   getUserByIdFromDB,
   deleteUserFromDB,

@@ -4,6 +4,8 @@ import HttpStatus from "http-status";
 import { userServices } from "./user.service";
 import { TUser } from "./user.interface";
 import catchAsync from "../../utils/catchAsync";
+import { FacultyModel } from "../faculty/faculty.model";
+import httpStatus from "http-status";
 
 // create user
 const createUser = catchAsync(async (req, res) => {
@@ -45,9 +47,20 @@ const deleteUserById = catchAsync(async (req, res) => {
     data: result,
   });
 });
-
+// create faculty
+const createFaculty = catchAsync(async (req, res) => {
+  const { password, faculty } = req.body;
+  const result = await userServices.createFacultyIntoDB(password, faculty);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "User created successfully",
+    data: result,
+  });
+});
 export const userController = {
   createUser,
+  createFaculty,
   getAllUsers,
   getUserById,
   deleteUserById,
