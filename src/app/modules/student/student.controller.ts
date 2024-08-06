@@ -18,7 +18,7 @@ const getAllStudents: RequestHandler = catchAsync(async (req, res) => {
 // Handler to get a student by ID
 const getStudentById = catchAsync(async (req, res) => {
   const { id } = req.params; // Use 'id' instead of 'studentId'
-  console.log("from controller : ", id);
+  // console.log("from controller : ", id);
 
   const result = await StudentServices.getStudentById(id);
   sendResponse(res, {

@@ -1,42 +1,36 @@
-import mongoose from "mongoose";
 import httpStatus from "http-status";
-import { Student } from "./student.model";
-import { TStudent } from "./student.interface";
+import mongoose from "mongoose";
+import QueryBuilder from "../../builder/QueryBuilder";
 import AppError from "../../errors/AppError";
 import UserModel from "../user/user.model";
+import { studentSearchableFields } from "./student.constants";
+import { TStudent } from "./student.interface";
+import { Student } from "./student.model";
 
-// Fetch all students from the database
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
-  // searching format : {email: {$regex : query.searchTerm , $options: "i"}},
-  // query copy object
-  const queryObject = { ...query };
-  const studentSearchFields: string[] = [
-    "fullName",
-    "firstName",
-    "lastName",
-    "email",
-    "contactNumber",
-    "id",
-    "presentAddress",
-    "permanentAddress",
-  ];
-  let searchTerm = "";
-  if (query && query.searchTerm) {
-    searchTerm = query?.searchTerm as string;
-  }
-  // search query
-  const searchQuery = Student.find({
-    $or: studentSearchFields.map((key) => ({
-      [key]: { $regex: searchTerm, $options: "i" },
-    })),
-  });
-  // filtering query
-  const excludeFields = ["searchTerm"];
-  excludeFields.forEach((element) => delete queryObject[element]);
+  const studentQuery = new QueryBuilder(
+    Student.find()
+      .populate("admissionSemester")
+      .populate({
+        path: "academicDepartment",
+        populate: {
+          path: "academicFaculty",
+        },
+      }),
+    query
+  )
+    .search(studentSearchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
 
-  // base find method
-  const result = await searchQuery
-    .find(queryObject)
+  const result = await studentQuery.modelQuery;
+  return result;
+};
+
+const getSingleStudentFromDB = async (id: string) => {
+  const result = await Student.findOne({ id })
     .populate("admissionSemester")
     .populate({
       path: "academicDepartment",
@@ -47,6 +41,50 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
   return result;
 };
 
+const updateStudentIntoDB = async (id: string, payload: Partial<TStudent>) => {
+  const { name, guardian, localGuardian, ...remainingStudentData } = payload;
+
+  const modifiedUpdatedData: Record<string, unknown> = {
+    ...remainingStudentData,
+  };
+
+  /*
+    guardain: {
+      fatherOccupation:"Teacher"
+    }
+
+    guardian.fatherOccupation = Teacher
+
+    name.firstName = 'Mezba'
+    name.lastName = 'Abedin'
+  */
+
+  if (name && Object.keys(name).length) {
+    for (const [key, value] of Object.entries(name)) {
+      modifiedUpdatedData[`name.${key}`] = value;
+    }
+  }
+
+  if (guardian && Object.keys(guardian).length) {
+    for (const [key, value] of Object.entries(guardian)) {
+      modifiedUpdatedData[`guardian.${key}`] = value;
+    }
+  }
+
+  if (localGuardian && Object.keys(localGuardian).length) {
+    for (const [key, value] of Object.entries(localGuardian)) {
+      modifiedUpdatedData[`localGuardian.${key}`] = value;
+    }
+  }
+
+  console.log(modifiedUpdatedData);
+
+  const result = await Student.findOneAndUpdate({ id }, modifiedUpdatedData, {
+    new: true,
+    runValidators: true,
+  });
+  return result;
+};
 // Fetch a student by ID from the database
 const getStudentById = async (id: string) => {
   console.log("from service : ", id);
@@ -64,50 +102,47 @@ const getStudentById = async (id: string) => {
   return result;
 };
 
-// Soft delete a student by ID (makes isDeleted = true)
 const deleteStudentFromDB = async (id: string) => {
   const session = await mongoose.startSession();
 
   try {
     session.startTransaction();
 
-    // Update the student document to mark it as deleted
     const deletedStudent = await Student.findOneAndUpdate(
       { id },
-      { $set: { isDeleted: true } },
+      { isDeleted: true },
       { new: true, session }
     );
 
-    // If student not found, throw an error
     if (!deletedStudent) {
       throw new AppError(httpStatus.BAD_REQUEST, "Failed to delete student");
     }
 
-    // Update the user document to mark it as deleted
     const deletedUser = await UserModel.findOneAndUpdate(
       { id },
-      { $set: { isDeleted: true } },
+      { isDeleted: true },
       { new: true, session }
     );
 
-    // If user not found, throw an error
     if (!deletedUser) {
       throw new AppError(httpStatus.BAD_REQUEST, "Failed to delete user");
     }
 
     await session.commitTransaction();
     await session.endSession();
+
     return deletedStudent;
-  } catch (error) {
+  } catch (err) {
     await session.abortTransaction();
     await session.endSession();
     throw new Error("Failed to delete student");
   }
 };
 
-// Exporting the student services
 export const StudentServices = {
   getAllStudentsFromDB,
+  getSingleStudentFromDB,
   getStudentById,
+  updateStudentIntoDB,
   deleteStudentFromDB,
 };
