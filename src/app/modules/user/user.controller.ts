@@ -6,6 +6,7 @@ import { TUser } from "./user.interface";
 import catchAsync from "../../utils/catchAsync";
 import { FacultyModel } from "../faculty/faculty.model";
 import httpStatus from "http-status";
+import { AdminModel } from "../admin/admin.model";
 
 // create user
 const createUser = catchAsync(async (req, res) => {
@@ -58,8 +59,21 @@ const createFaculty = catchAsync(async (req, res) => {
     data: result,
   });
 });
+
+// create admin
+const createAdmin = catchAsync(async (req, res) => {
+  const { password, admin } = req.body;
+  const result = await userServices.createAdminIntoDB(password, admin);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: " Admin created SuccessFully",
+    data: result,
+  });
+});
 export const userController = {
   createUser,
+  createAdmin,
   createFaculty,
   getAllUsers,
   getUserById,

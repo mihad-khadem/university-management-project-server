@@ -3,6 +3,7 @@ import { userController } from "./user.controller";
 import validateRequest from "../../middleware/validateRequest";
 import createZodStudentValidation from "../student/zod.validation";
 import { createFacultyValidationSchema } from "../faculty/faculty.validation";
+import { createAdminValidationSchema } from "../admin/admin.validation";
 
 const router = express.Router();
 
@@ -18,6 +19,12 @@ router.post(
   "/create-faculty",
   validateRequest(createFacultyValidationSchema),
   userController.createFaculty
+);
+// create admin
+router.post(
+  "/create-admin",
+  validateRequest(createAdminValidationSchema),
+  userController.createAdmin
 );
 
 // get all users

@@ -8,6 +8,7 @@ const handleCastError = (
     {
       path: err.path,
       message: err.message,
+      value: err.value,
     },
   ];
   const statusCode = 400;
