@@ -1,6 +1,6 @@
 # University Management Server
 
-### (Front-End)[https://github.com/mihad-khadem/university-frontend]
+### [Front-End](https://github.com/mihad-khadem/university-frontend)
 
 ## Technology Stack
 
