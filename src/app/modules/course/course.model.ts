@@ -13,6 +13,7 @@ const preRequisiteSchema = new mongoose.Schema<TPreRequisite>({
     default: false,
   },
 });
+
 const courseSchema = new mongoose.Schema<TCourse>(
   {
     name: {
@@ -24,7 +25,6 @@ const courseSchema = new mongoose.Schema<TCourse>(
       type: Number,
       required: true,
     },
-
     description: {
       type: String,
       required: true,
@@ -53,7 +53,7 @@ const courseSchema = new mongoose.Schema<TCourse>(
 );
 
 export const CourseModel = mongoose.model<TCourse>("Course", courseSchema);
-
+// Course faculty Schema
 const courseFacultySchema = new Schema<TCourseFaculty>({
   course: {
     type: Schema.Types.ObjectId,
