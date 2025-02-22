@@ -1,6 +1,7 @@
 # Ignore node_modules directory
 node_modules/
 dist/
+.vscode/
 
 # Ignore compiled TypeScript files
 *.js

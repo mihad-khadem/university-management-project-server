@@ -14,9 +14,17 @@ router.post(
   OfferedCourseController.createOfferedCourse
 );
 // Get all offered courses
-// router.get("/", OfferedCourseController.getAllOfferedCourses);
+router.get("/", OfferedCourseController.getAllOfferedCourses);
 
 // Get offered course by id
-// router.get("/:id", OfferedCourseController.getOfferedCourseById);
+router.get("/:id", OfferedCourseController.getOfferedCourseById);
+// update offered course
+router.put(
+  "/:id",
+  validateRequest(OfferedCourseValidations.updateOfferedCourseValidationSchema),
+  OfferedCourseController.updateOfferedCourse
+);
+// delete offered course
+router.delete("/:id", OfferedCourseController.deleteOfferedCourse);
 
 export const offeredCourseRoutes = router;
