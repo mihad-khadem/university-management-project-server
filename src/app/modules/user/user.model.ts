@@ -1,8 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from "mongoose";
-import { TUser } from "./user.interface";
+import { IUserModel, TUser } from "./user.interface";
 import config from "../../config";
 import bcrypt from "bcrypt";
 import { NextFunction } from "express";
+
+// user schema
 
 export const userSchema = new mongoose.Schema<TUser>(
   {
@@ -18,6 +21,10 @@ export const userSchema = new mongoose.Schema<TUser>(
     needsPasswordChange: {
       type: Boolean,
       default: true,
+    },
+    passwordChangedAt: {
+      type: Date,
+      required: false,
     },
     status: {
       type: String,
@@ -49,6 +56,20 @@ userSchema.post("save", function (doc, next) {
   doc.password = " ";
   next();
 });
+// statics methods
 
-const UserModel = mongoose.model<TUser>("User", userSchema);
+// checking if user is already exist!
+userSchema.statics.isUserExistByCustomId = async function (id: string) {
+  return await this.findOne({ id });
+};
+// validating password
+userSchema.statics.validatePassword = async function (
+  passwordFromUser,
+  hashedPassword
+) {
+  return await bcrypt.compare(passwordFromUser, hashedPassword);
+};
+// checking if JWT issued before password change
+
+const UserModel = mongoose.model<TUser, IUserModel>("User", userSchema);
 export default UserModel;

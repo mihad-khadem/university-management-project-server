@@ -10,6 +10,7 @@ const router = express.Router();
 // create user api
 router.post(
   "/create-student",
+
   validateRequest(createZodStudentValidation),
   userController.createUser
 );

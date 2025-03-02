@@ -56,7 +56,7 @@ const createUserInDB = async (password: string, payload: TStudent) => {
 
     // Assign the generated ID and user reference to the payload
     payload.id = newUser[0].id;
-    payload.user = newUser[0]._id;
+    payload.user = newUser[0]._id as mongoose.Types.ObjectId;
 
     // Create a new student document (transaction step 2)
     const newStudent = await Student.create([payload], { session });
@@ -140,7 +140,7 @@ const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
 
     // Assign the generated ID and user reference to the payload
     payload.id = newUser[0].id;
-    payload.user = newUser[0]._id;
+    payload.user = newUser[0]._id as mongoose.Types.ObjectId;
 
     // Create a new faculty document (transaction step 2)
     const newFaculty = await FacultyModel.create([payload], { session });
@@ -194,7 +194,7 @@ const createAdminIntoDB = async (password: string, payload: TAdmin) => {
 
     // Assign the generated ID and user reference to the payload
     payload.id = newUser[0].id;
-    payload.user = newUser[0]._id;
+    payload.user = newUser[0]._id as mongoose.Types.ObjectId;
 
     // Create a new admin document (transaction step 2)
     const newAdmin = await AdminModel.create([payload], { session });
