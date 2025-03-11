@@ -7,6 +7,7 @@ import { TUserLogin } from "./auth.interface";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import config from "../../config";
 import bcrypt from "bcrypt";
+import { createToken } from "./auth.utils";
 const loginUser = async (payload: TUserLogin) => {
   //  check if user exists
   const user = await UserModel.isUserExistByCustomId(payload.id);
@@ -30,11 +31,19 @@ const loginUser = async (payload: TUserLogin) => {
     userId: user.id,
     role: user.role,
   };
-  const token = jwt.sign(jwtPayload, config.jwtAccessSecret as string, {
-    expiresIn: "72h",
-  });
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwtAccessSecret as string,
+    config.jwtAccessExpiration as string
+  );
+  const refreshToken = createToken(
+    jwtPayload,
+    config.jwtRefreshSecret as string,
+    config.jwtRefreshExpiration as string
+  );
   return {
-    token,
+    accessToken,
+    refreshToken,
     needsPasswordChange: user?.needsPasswordChange,
   };
 };
@@ -78,7 +87,8 @@ const changePassword = async (
       password: newHashedPassword,
       needsPasswordChange: false,
       passwordChangedAt: Date.now(),
-    }
+    },
+    { new: true }
   );
   return null;
 };

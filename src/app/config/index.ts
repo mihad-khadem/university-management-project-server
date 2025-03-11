@@ -5,11 +5,13 @@ import path from "path";
 dotenv.config({ path: path.join(process.cwd(), ".env") });
 
 export default {
-  port: process.env.PORT || 5000, // Default to 5000 if PORT is not defined
+  port: process.env.PORT || 5000,
   databaseURL: process.env.MONGODB_URL,
   defaultPassword: process.env.DEFAULT_PASSWORD,
-  bcryptSaltRounds: process.env.SALT,
+  bcryptSaltRounds: Number(process.env.SALT) || 10,
   node_env: process.env.NODE_ENV,
   jwtAccessSecret: process.env.JWT_ACCESS_SECRET,
-  jwtExpiration: process.env.JWT_EXPIRATION,
+  jwtRefreshSecret: process.env.JWT_REFRESH_SECRET,
+  jwtRefreshExpiration: process.env.JWT_REFRESH_EXPIRATION,
+  jwtAccessExpiration: process.env.JWT_ACCESS_EXPIRATION,
 };
