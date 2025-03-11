@@ -6,6 +6,7 @@ import UserModel from "../user/user.model";
 import { TUserLogin } from "./auth.interface";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import config from "../../config";
+import bcrypt from "bcrypt";
 const loginUser = async (payload: TUserLogin) => {
   //  check if user exists
   const user = await UserModel.isUserExistByCustomId(payload.id);
@@ -39,14 +40,47 @@ const loginUser = async (payload: TUserLogin) => {
 };
 // change password service -> reset
 const changePassword = async (
-  user: JwtPayload,
+  userData: JwtPayload,
   payload: { oldPassword: string; newPassword: string }
 ) => {
   // change password logic
-  const result = await UserModel.findOneAndUpdate({
-    id: user.userId,
-    role: user.role,
-  });
+  const user = await UserModel.isUserExistByCustomId(userData.userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User Does Not Exist");
+  }
+  // check if the user is already deleted
+  if (user?.isDeleted) {
+    throw new AppError(httpStatus.FORBIDDEN, "User is deleted!");
+  }
+  // check if the user is blocked
+  if (user?.status === "blocked") {
+    throw new AppError(httpStatus.FORBIDDEN, "User is blocked!");
+  }
+  // check if the users password is correct
+  if (!UserModel.validatePassword(payload?.oldPassword, user.password)) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "Enter valid password ");
+  }
+  // Hash the new password and update the user
+  const newHashedPassword = await bcrypt.hash(
+    payload.newPassword,
+    Number(config.bcryptSaltRounds)
+  );
+  // change password is changed once
+  if (!user?.needsPasswordChange) {
+    throw new AppError(httpStatus.FORBIDDEN, "Password already changed once!");
+  }
+  const result = await UserModel.findOneAndUpdate(
+    {
+      id: userData.userId,
+      role: userData.role,
+    },
+    {
+      password: newHashedPassword,
+      needsPasswordChange: false,
+      passwordChangedAt: Date.now(),
+    }
+  );
+  return null;
 };
 export const AuthService = {
   loginUser,

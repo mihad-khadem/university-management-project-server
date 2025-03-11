@@ -71,6 +71,12 @@ userSchema.statics.validatePassword = async function (
   return await bcrypt.compare(passwordFromUser, hashedPassword);
 };
 // checking if JWT issued before password change
-
+userSchema.statics.isJWTIssuedBeforePasswordChange = async function (
+  passwordChangeTimeStamp: Date,
+  jwtIssuedTimeStamp: number
+) {
+  const passwordChangedAt = new Date(passwordChangeTimeStamp).getTime() / 1000;
+  return passwordChangedAt > jwtIssuedTimeStamp;
+};
 const UserModel = mongoose.model<TUser, IUserModel>("User", userSchema);
 export default UserModel;

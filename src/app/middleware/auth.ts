@@ -41,7 +41,27 @@ const validateAuthToken = (...requiredRoles: TUserRoles[]) => {
     if (!user) {
       throw new AppError(httpStatus.NOT_FOUND, "User not found");
     }
-
+    // check if the user is deleted
+    if (user?.isDeleted) {
+      throw new AppError(httpStatus.FORBIDDEN, "User is deleted!");
+    }
+    // check if the user is blocked
+    if (user?.status === "blocked") {
+      throw new AppError(httpStatus.FORBIDDEN, "User is blocked!");
+    }
+    // check if the user changed password after the token was issued
+    if (
+      user.passwordChangedAt &&
+      UserModel.isJWTIssuedBeforePasswordChange(
+        user.passwordChangedAt,
+        iat as number
+      )
+    ) {
+      throw new AppError(
+        httpStatus.FORBIDDEN,
+        "You are not authorized to access this resource"
+      );
+    }
     // set the user object in the request
     req.user = decoded as JwtPayload;
 
