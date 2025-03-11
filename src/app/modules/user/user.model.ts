@@ -17,6 +17,7 @@ export const userSchema = new mongoose.Schema<TUser>(
     password: {
       type: String,
       required: true,
+      select: false,
     },
     needsPasswordChange: {
       type: Boolean,
@@ -60,7 +61,7 @@ userSchema.post("save", function (doc, next) {
 
 // checking if user is already exist!
 userSchema.statics.isUserExistByCustomId = async function (id: string) {
-  return await this.findOne({ id });
+  return await this.findOne({ id }).select("+password");
 };
 // validating password
 userSchema.statics.validatePassword = async function (

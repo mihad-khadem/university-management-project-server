@@ -4,8 +4,7 @@ import httpStatus from "http-status";
 import AppError from "../../errors/AppError";
 import UserModel from "../user/user.model";
 import { TUserLogin } from "./auth.interface";
-import bycrpt from "bcrypt";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import config from "../../config";
 const loginUser = async (payload: TUserLogin) => {
   //  check if user exists
@@ -38,7 +37,18 @@ const loginUser = async (payload: TUserLogin) => {
     needsPasswordChange: user?.needsPasswordChange,
   };
 };
-
+// change password service -> reset
+const changePassword = async (
+  user: JwtPayload,
+  payload: { oldPassword: string; newPassword: string }
+) => {
+  // change password logic
+  const result = await UserModel.findOneAndUpdate({
+    id: user.userId,
+    role: user.role,
+  });
+};
 export const AuthService = {
   loginUser,
+  changePassword,
 };

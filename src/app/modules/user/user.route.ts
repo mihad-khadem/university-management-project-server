@@ -4,13 +4,15 @@ import validateRequest from "../../middleware/validateRequest";
 import createZodStudentValidation from "../student/zod.validation";
 import { createFacultyValidationSchema } from "../faculty/faculty.validation";
 import { createAdminValidationSchema } from "../admin/admin.validation";
+import validateAuthToken from "../../middleware/auth";
+import { USER_ROLE } from "./user.interface";
 
 const router = express.Router();
 
 // create user api
 router.post(
   "/create-student",
-
+  validateAuthToken(USER_ROLE.admin),
   validateRequest(createZodStudentValidation),
   userController.createUser
 );
@@ -18,6 +20,7 @@ router.post(
 
 router.post(
   "/create-faculty",
+  validateAuthToken(USER_ROLE.admin),
   validateRequest(createFacultyValidationSchema),
   userController.createFaculty
 );
