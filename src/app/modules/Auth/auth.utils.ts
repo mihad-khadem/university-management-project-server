@@ -1,11 +1,14 @@
-// Auth utils
-
-import jwt from "jsonwebtoken";
+import jwt, { Secret, SignOptions } from "jsonwebtoken";
 
 export const createToken = (
-  jwtPayload: { userId: string; role: string },
-  secret: string,
-  expiresIn: string
+  payload: object,
+  secret: Secret,
+  expireTime: string | number // Accept both string and number
 ): string => {
-  return jwt.sign(jwtPayload, secret, { expiresIn });
+  const options: SignOptions = {
+    algorithm: "HS256",
+    expiresIn: expireTime as any,
+  };
+
+  return jwt.sign(payload, secret, options);
 };

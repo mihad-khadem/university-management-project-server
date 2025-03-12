@@ -7,7 +7,8 @@ import { TUserLogin } from "./auth.interface";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import config from "../../config";
 import bcrypt from "bcrypt";
-import { createToken } from "./auth.utils";
+import createToken from "./auth.utils";
+
 const loginUser = async (payload: TUserLogin) => {
   //  check if user exists
   const user = await UserModel.isUserExistByCustomId(payload.id);
@@ -34,12 +35,12 @@ const loginUser = async (payload: TUserLogin) => {
   const accessToken = createToken(
     jwtPayload,
     config.jwtAccessSecret as string,
-    config.jwtAccessExpiration as string
+    "36h"
   );
   const refreshToken = createToken(
     jwtPayload,
     config.jwtRefreshSecret as string,
-    config.jwtRefreshExpiration as string
+    "14d"
   );
   return {
     accessToken,
