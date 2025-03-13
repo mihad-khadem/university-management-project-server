@@ -17,7 +17,7 @@ const validateAuthToken = (...requiredRoles: TUserRoles[]) => {
     if (!authHeader) {
       throw new AppError(
         httpStatus.UNAUTHORIZED,
-        "You are not authorized to access this resource"
+        "You are not authorized to access this resource! Token not found"
       );
     }
     // check if the authorization header is valid
@@ -25,7 +25,7 @@ const validateAuthToken = (...requiredRoles: TUserRoles[]) => {
     if (!decoded) {
       throw new AppError(
         httpStatus.UNAUTHORIZED,
-        "You are not authorized to access this resource"
+        "You are not authorized to access this resource! Invalid token"
       );
     }
     const { userId, iat, role } = decoded as JwtPayload;
@@ -33,7 +33,7 @@ const validateAuthToken = (...requiredRoles: TUserRoles[]) => {
     if (requiredRoles && !requiredRoles.includes(role)) {
       throw new AppError(
         httpStatus.FORBIDDEN,
-        "You are not authorized to access this resource"
+        "You are not authorized to access this resource! You don't have the required role"
       );
     }
     // check is user exists
@@ -59,7 +59,7 @@ const validateAuthToken = (...requiredRoles: TUserRoles[]) => {
     ) {
       throw new AppError(
         httpStatus.FORBIDDEN,
-        "You are not authorized to access this resource"
+        "You are not authorized to access this resource! Password changed after token was issued"
       );
     }
     // set the user object in the request

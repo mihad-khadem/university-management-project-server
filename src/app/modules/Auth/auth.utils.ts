@@ -1,6 +1,6 @@
 import jwt, { Secret, SignOptions } from "jsonwebtoken";
 
-export const createToken = (
+const createToken = (
   payload: object,
   secret: Secret,
   expireTime: string | number // Accept both string and number
@@ -12,3 +12,5 @@ export const createToken = (
 
   return jwt.sign(payload, secret, options);
 };
+
+export default createToken;

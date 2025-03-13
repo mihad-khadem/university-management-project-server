@@ -12,6 +12,11 @@ import createToken from "./auth.utils";
 const loginUser = async (payload: TUserLogin) => {
   //  check if user exists
   const user = await UserModel.isUserExistByCustomId(payload.id);
+  // check if the password is empty
+  if (!payload.password || payload.password.trim() === "") {
+    console.log("Error: Password is empty");
+    throw new AppError(httpStatus.BAD_REQUEST, "Password cannot be empty!");
+  }
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "User Does Not Exist");
   }
@@ -24,9 +29,17 @@ const loginUser = async (payload: TUserLogin) => {
     throw new AppError(httpStatus.FORBIDDEN, "User is blocked!");
   }
   // check if the users password is correct
-  if (!UserModel.validatePassword(payload.password, user.password)) {
-    throw new AppError(httpStatus.UNAUTHORIZED, "Enter valid password ");
+  const isPasswordValid = await UserModel.validatePassword(
+    payload.password,
+    user.password
+  );
+  if (!isPasswordValid) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      "Invalid password! Enter valid password"
+    );
   }
+
   // access granted if the user pass all validations, send with access token and refresh token
   const jwtPayload = {
     userId: user.id,
@@ -35,13 +48,16 @@ const loginUser = async (payload: TUserLogin) => {
   const accessToken = createToken(
     jwtPayload,
     config.jwtAccessSecret as string,
-    "36h"
+    config.jwtAccessExpiration as string
   );
   const refreshToken = createToken(
     jwtPayload,
     config.jwtRefreshSecret as string,
-    "14d"
+    config.jwtRefreshExpiration as string
   );
+  console.log("Received password:", payload.password);
+  console.log("Stored password:", user.password);
+  console.log("Password validation result:", isPasswordValid);
   return {
     accessToken,
     refreshToken,
@@ -93,7 +109,69 @@ const changePassword = async (
   );
   return null;
 };
+// refresh token
+const refreshToken = async (token: string) => {
+  // refresh token logic
+  //  check if the token is not present
+  if (!token) {
+    throw new AppError(httpStatus.FORBIDDEN, "Refresh token is required!");
+  }
+  // check if the token is valid
+  const decoded = jwt.verify(token, config.jwtRefreshSecret as string);
+  if (!decoded) {
+    throw new AppError(httpStatus.FORBIDDEN, "Invalid refresh token!");
+  }
+  const { userId, role, iat } = decoded as JwtPayload;
+  // check if the user exists
+  const user = await UserModel.isUserExistByCustomId(userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User Does Not Exist");
+  }
+  // check if the user is already deleted
+  if (user?.isDeleted) {
+    throw new AppError(httpStatus.FORBIDDEN, "User is deleted!");
+  }
+  // check if the user is blocked
+  if (user?.status === "blocked") {
+    throw new AppError(httpStatus.FORBIDDEN, "User is blocked!");
+  }
+  // check if the user has the required roles
+  if (user?.role !== "admin") {
+    throw new AppError(httpStatus.FORBIDDEN, "You are not authorized!");
+  }
+  // check if the token is expired or not
+  if (
+    user?.passwordChangedAt &&
+    UserModel.isJWTIssuedBeforePasswordChange(
+      user.passwordChangedAt,
+      iat as number
+    )
+  ) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "Password changed, please login again!"
+    );
+  }
+  // payload
+  const jwtPayload = {
+    userId: user.id,
+    role: user.role,
+  };
+  // create access token
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwtAccessSecret as string,
+    config.jwtAccessExpiration as string
+  );
+  // access granted if the user pass all validations, send with access token and refresh token
+  return {
+    accessToken,
+  };
+};
+
+// export
 export const AuthService = {
   loginUser,
   changePassword,
+  refreshToken,
 };
