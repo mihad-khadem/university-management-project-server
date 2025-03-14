@@ -49,17 +49,26 @@ const validateAuthToken = (...requiredRoles: TUserRoles[]) => {
     if (user?.status === "blocked") {
       throw new AppError(httpStatus.FORBIDDEN, "User is blocked!");
     }
+    // Debugging code
+    // const passChangeTime = await UserModel.isJWTIssuedBeforePasswordChange(
+    //   user.passwordChangedAt as Date,
+    //   iat as number
+    // );
+    // console.log("User passwordChangedAt:", user.passwordChangedAt);
+    // console.log("JWT issued at (iat):", iat);
+    // console.log("Password changed after token was issued:" + passChangeTime);
+
     // check if the user changed password after the token was issued
     if (
       user.passwordChangedAt &&
-      UserModel.isJWTIssuedBeforePasswordChange(
+      (await UserModel.isJWTIssuedBeforePasswordChange(
         user.passwordChangedAt,
         iat as number
-      )
+      ))
     ) {
       throw new AppError(
         httpStatus.FORBIDDEN,
-        "You are not authorized to access this resource! Password changed after token was issued"
+        "You are not authorized to access this resource! Password changed after token was issued! Please login again"
       );
     }
     // set the user object in the request

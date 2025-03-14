@@ -142,10 +142,10 @@ const refreshToken = async (token: string) => {
   // check if the token is expired or not
   if (
     user?.passwordChangedAt &&
-    UserModel.isJWTIssuedBeforePasswordChange(
+    (await UserModel.isJWTIssuedBeforePasswordChange(
       user.passwordChangedAt,
       iat as number
-    )
+    ))
   ) {
     throw new AppError(
       httpStatus.FORBIDDEN,
